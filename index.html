@@ -277,7 +277,7 @@ let scrollTimeout = null;
 document.getElementById('transcript').addEventListener('wheel', () => {
   userScrolling = true;
   clearTimeout(scrollTimeout);
-  scrollTimeout = setTimeout(() => userScrolling = false, 3000);
+  scrollTimeout = setTimeout(() => userScrolling = false, 5000);
 });
 
 
