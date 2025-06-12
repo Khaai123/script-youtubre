@@ -45,7 +45,7 @@
     }
 </style>
 <script src="https://www.youtube.com/iframe_api">
-
+  
 </script>
 </head>
 <body>
@@ -330,6 +330,21 @@ function saveScripts() {
       viChunks.push(block);
     }
   }
+
+  const blob = new Blob([JSON.stringify({
+    videoId,
+    zhText: zhChunks.join('\n\n'),
+    viText: viChunks.join('\n\n')
+  }, null, 2)], { type: 'application/json' });
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `transcript_${videoId || 'video'}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 
 function loadScriptFile(event) {
   const file = event.target.files[0];
