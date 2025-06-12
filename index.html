@@ -45,64 +45,6 @@
     }
 </style>
 <script src="https://www.youtube.com/iframe_api">
-function saveScripts() {
-  const videoId = document.getElementById('videoIdInput').value.trim();
-
-  const lines = document.querySelectorAll('.line');
-  const enChunks = [];
-  const viChunks = [];
-
-  for (const line of lines) {
-    const time = parseInt(line.dataset.time || '0');
-    const minutes = Math.floor(time / 60);
-    const seconds = (time % 60).toString().padStart(2, '0');
-    const content = line.innerHTML
-      .replace(/<button[^>]*>.*?<\/button>/g, '') // remove buttons
-      .replace(/<div class="result">.*?<\/div>/g, '') // remove result boxes
-      .replace(/<[^>]+>/g, '') // remove all tags
-      .trim();
-
-    const entry = `${minutes}:${seconds}\n${content}`;
-
-    if (line.classList.contains('user')) {
-      enChunks.push(entry);
-    } else if (line.classList.contains('machine')) {
-      viChunks.push(entry);
-    }
-  }
-
-  const blob = new Blob([JSON.stringify({
-    videoId,
-    zhText: enChunks.join('\n'),
-    viText: viChunks.join('\n')
-  }, null, 2)], { type: 'application/json' });
-
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `transcript_${videoId || 'video'}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-
-function loadScriptFile(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const data = JSON.parse(e.target.result);
-      document.getElementById('videoIdInput').value = data.videoId || '';
-      document.getElementById('scriptZH').value = data.zhText || '';
-      document.getElementById('scriptVI').value = data.viText || '';
-    } catch (err) {
-      alert('Invalid JSON file.');
-    }
-  };
-  reader.readAsText(file);
-}
 
 </script>
 </head>
@@ -363,44 +305,31 @@ document.addEventListener('dblclick', e => {
 
 function saveScripts() {
   const videoId = document.getElementById('videoIdInput').value.trim();
-
   const lines = document.querySelectorAll('.line');
-  const enChunks = [];
+  const zhChunks = [];
   const viChunks = [];
 
   for (const line of lines) {
     const time = parseInt(line.dataset.time || '0');
     const minutes = Math.floor(time / 60);
     const seconds = (time % 60).toString().padStart(2, '0');
-    const content = line.innerHTML
-      .replace(/<button[^>]*>.*?<\/button>/g, '') // remove buttons
-      .replace(/<div class="result">.*?<\/div>/g, '') // remove result boxes
-      .replace(/<[^>]+>/g, '') // remove all tags
+
+    let content = line.innerHTML
+      .replace(/<button[^>]*>.*?<\/button>/g, '')  // bỏ nút 🎤
+      .replace(/<div class="result">.*?<\/div>/g, '')  // bỏ kết quả phát âm
+      .replace(/<br\s*\/?>/gi, '\n')  // chuyển <br> thành xuống dòng
+      .replace(/<[^>]+>/g, '')        // xoá thẻ HTML
+      .replace(/\n{2,}/g, '\n')       // xoá dòng trắng thừa
       .trim();
 
-    const entry = `${minutes}:${seconds}\n${content}`;
+    const block = `${minutes}:${seconds}\n${content}`;
 
     if (line.classList.contains('user')) {
-      enChunks.push(entry);
+      zhChunks.push(block);
     } else if (line.classList.contains('machine')) {
-      viChunks.push(entry);
+      viChunks.push(block);
     }
   }
-
-  const blob = new Blob([JSON.stringify({
-    videoId,
-    zhText: enChunks.join('\n'),
-    viText: viChunks.join('\n')
-  }, null, 2)], { type: 'application/json' });
-
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `transcript_${videoId || 'video'}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
 
 function loadScriptFile(event) {
   const file = event.target.files[0];
