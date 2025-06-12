@@ -95,7 +95,7 @@ function loadScriptFile(event) {
     try {
       const data = JSON.parse(e.target.result);
       document.getElementById('videoIdInput').value = data.videoId || '';
-      document.getElementById('scriptEN').value = data.enText || '';
+      document.getElementById('scriptZH').value = data.zhText || '';
       document.getElementById('scriptVI').value = data.viText || '';
     } catch (err) {
       alert('Invalid JSON file.');
